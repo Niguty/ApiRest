@@ -6,23 +6,23 @@ import { Card } from "../entities/card.entity";
 
 @Injectable()
 export class CardsRepository {
-    constructor(@InjectModel('cards') private readonly  cardModel: Model<Card>){}
+  constructor(@InjectModel('cards') private readonly cardModel: Model<Card>) {}
 
-    async salvarCard(newCard: CreateCardDto): Promise<Card>{
-        const pegarCard = new this.cardModel(newCard);
-        return await pegarCard.save();
-    }
+  async pegarCard(): Promise<Card[]> {
+    return this.cardModel.find().exec();
+  }
 
-    async pegarCard(): Promise<Card[]>{
-        return await this.cardModel.find({},{_v: false}).sort({commander : +1}).exec();
-    }
+  async pegarCardId(idCards: string): Promise<Card> {
+    return this.cardModel.findById(idCards).exec();
+  }
 
-    async pegarCardId(idCards: string): Promise<Card>{
-        return await this.cardModel.findById(idCards, {__v:false});
-    }
+  async salvarCard(newCard: CreateCardDto): Promise<Card> {
+    const newCardEntity = new this.cardModel(newCard);
+    return await newCardEntity.save();
+  }
 
-    async deletarCard(idCards: string): Promise<string> {
-        const cardsId = await this.cardModel.findByIdAndDelete(idCards);
-        return `this ${cardsId} was deleted`;
-    }
+  async deletarCard(idCards: string): Promise<string> {
+    const card = await this.cardModel.findByIdAndDelete(idCards);
+    return `Card with id ${card.id} was deleted`;
+  }
 }

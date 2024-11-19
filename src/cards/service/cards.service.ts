@@ -1,26 +1,43 @@
-import { Injectable } from '@nestjs/common';
-import { CreateCardDto } from '../dto/create-card.dto';
-import { UpdateCardDto } from '../dto/update-card.dto';
+import { BadRequestException, Injectable } from "@nestjs/common";
+import { CardsRepository } from "../MONGO/cards.repository";
+import { CreateCardDto } from "../dto/create-card.dto";
+import { Card } from "../entities/card.entity";
+
+
 
 @Injectable()
 export class CardsService {
-  create(createCardDto: CreateCardDto) {
-    return 'This action adds a new card';
+  constructor(private readonly cardsRepository: CardsRepository) {}
+
+  async saveCard(newCard: CreateCardDto): Promise<Card> {
+    return await this.cardsRepository.salvarCard(newCard);
   }
 
-  findAll() {
-    return `This action returns all cards`;
+  async pegarCard(): Promise<Card[]> {
+    return this.cardsRepository.pegarCard();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} card`;
+  async pegarCardId(idCards: string): Promise<Card> {
+    return this.cardsRepository.pegarCardId(idCards);
   }
 
-  update(id: number, updateCardDto: UpdateCardDto) {
-    return `This action updates a #${id} card`;
+  async deleteCardsId(idCards: string): Promise<string> {
+    return this.cardsRepository.deletarCard(idCards);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} card`;
-  }
+    async criaDeck(): Promise<object>{
+        console.log('chegou aqui');
+        try {
+            const apiCards = await fetch(`https://api.magicthegathering.io/v1/cards`);
+            if(!apiCards.ok){
+                throw new Error(`${apiCards.status}`);
+            }
+            const apiCardsJson = await apiCards.json();
+            console.log(apiCardsJson);
+            return apiCardsJson;
+        } catch (error) {
+            throw new BadRequestException("Return of api was {}");
+        }
+        
+    }
 }

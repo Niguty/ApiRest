@@ -1,27 +1,62 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
+import { User } from '../entities/user.entity';
+
+
 
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  private users: User[] = []; 
+
+  create(createUserDto: CreateUserDto): string {
+    const newUser = new User();
+    newUser.id = this.users.length + 1;
+    newUser.name = createUserDto.name;
+    newUser.email = createUserDto.email;
+
+    this.users.push(newUser);
+
+    return `Usuario ${newUser.name} criado com sucesso!`;
   }
 
-  findAll() {
-    return `This action returns all users`;
+  findAll(): User[] {
+    return this.users;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  findOne(id: number): User | string {
+    const user = this.users.find((user) => user.id === id);
+
+    if(!user) {
+      return `Usuário com ID ${id} não encontrado.`;
+    }
+
+    return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  update(id: number, updateUserDto: UpdateUserDto): string {
+    const userIndex = this.users.findIndex((user) => user.id === id);
+
+    if (userIndex === -1) {
+      return `Usuário com ID ${id} não encontrado.`;
+    }
+
+    const updatedUser = { ...this.users[userIndex], ...updateUserDto };
+    this.users[userIndex] = updatedUser;
+
+    return `Usuário com ID ${id} atualizado com sucesso!`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  remove(id: number): string {
+    const userIndex = this.users.findIndex((user) => user.id === id);
+
+    if (userIndex === -1) {
+      return `Usuário com ID ${id} não encontrado.`;
+    }
+
+    this.users.splice(userIndex, 1);
+
+    return `Usuário com ID ${id} removido com sucesso!`;
   }
 }

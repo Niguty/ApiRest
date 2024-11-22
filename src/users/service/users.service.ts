@@ -1,62 +1,36 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from '../dto/create-user.dto';
-import { UpdateUserDto } from '../dto/update-user.dto';
-import { User } from '../entities/user.entity';
-
-
+import { Injectable, UseGuards } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { User } from 'src/users/entities/user.entity';
 
 
 @Injectable()
 export class UsersService {
-  private users: User[] = []; 
+    constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+        
+        async create(CreateUserDto: CreateUserDto): Promise<User> {
+            const createdUser = new this.userModel(CreateUserDto);
+            return createdUser.save();
+        }
 
-  create(createUserDto: CreateUserDto): string {
-    const newUser = new User();
-    newUser.id = this.users.length + 1;
-    newUser.name = createUserDto.name;
-    newUser.email = createUserDto.email;
+        async findAll(): Promise<User[]> {
+            return this.userModel.find().exec();
+        }
 
-    this.users.push(newUser);
+        async findById(idUser: string): Promise<User> {
+            return this.userModel.findById(idUser).exec();
+        }
 
-    return `Usuario ${newUser.name} criado com sucesso!`;
-  }
+        async update(idUser: string, updatedUserDto: Partial<CreateUserDto>): Promise<User> {
+            const updatedUser = await this.userModel.findByIdAndUpdate(idUser,updatedUserDto,
+            { new: true, userFindAndModify: false }).exec();
+            return updatedUser;
+        }
 
-  findAll(): User[] {
-    return this.users;
-  }
+        async deleteById(idUser: string): Promise<User> {
+            const deletedUser = this.userModel.findByIdAndDelete(idUser).exec();
+            return deletedUser;
+        }
 
-  findOne(id: number): User | string {
-    const user = this.users.find((user) => user.id === id);
-
-    if(!user) {
-      return `Usuário com ID ${id} não encontrado.`;
-    }
-
-    return user;
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto): string {
-    const userIndex = this.users.findIndex((user) => user.id === id);
-
-    if (userIndex === -1) {
-      return `Usuário com ID ${id} não encontrado.`;
-    }
-
-    const updatedUser = { ...this.users[userIndex], ...updateUserDto };
-    this.users[userIndex] = updatedUser;
-
-    return `Usuário com ID ${id} atualizado com sucesso!`;
-  }
-
-  remove(id: number): string {
-    const userIndex = this.users.findIndex((user) => user.id === id);
-
-    if (userIndex === -1) {
-      return `Usuário com ID ${id} não encontrado.`;
-    }
-
-    this.users.splice(userIndex, 1);
-
-    return `Usuário com ID ${id} removido com sucesso!`;
-  }
 }

@@ -23,6 +23,6 @@ export class CardsRepository {
 
   async deletarCard(idCards: string): Promise<string> {
     const card = await this.cardModel.findByIdAndDelete(idCards);
-    return `Card with id ${card.id} was deleted`;
+    return `Carta com o id ${card.id} foi deletada`;
   }
 }
